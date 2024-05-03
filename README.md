@@ -1,2 +1,2 @@
 # AMeThyst
-AMeThyst: Art Metrics Tools for hypothesis test
+AMeThyst: **A**rt **Me**trics **T**ools for **hy**pothe**s**is **t**est
