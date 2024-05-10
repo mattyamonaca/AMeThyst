@@ -45,21 +45,6 @@ def depth_analysis(depth_map, window_size = 64):
     
     return result
 
-def create_heatmap_overlay(image, result, alpha=0.5, save_path='heatmap_overlay.png'):
-    height, width = image.shape[:2]
-    image = np.array(image, dtype=np.uint8)
-    color_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
-    plt.imshow(result, cmap='jet', alpha=alpha)
-    plt.axis('off')
-    plt.savefig('heatmap.png', bbox_inches='tight', pad_inches=0)
-    plt.close()
-    heatmap = cv2.imread('heatmap.png')
-    heatmap = cv2.resize(heatmap, (width, height))
-    cv2.imwrite('heatmap.png', heatmap)
-    overlay = cv2.addWeighted(color_image, 1-alpha, heatmap, alpha, 0)
-    cv2.imwrite(save_path, overlay)
-    return overlay
 
 def process(image, window_size):
     image_tensor = load_and_process_image(image)
