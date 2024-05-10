@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tools import depth, sam, spectralresidual
+from tools import depth, sam, spectralresidual, brightness
 from tools import depth
 from utils import load_seg_model
 
@@ -52,11 +52,11 @@ def composite(results):
 
 def analysis(
         image,
-        sam_flag, depth_flag, spectralresidual_flag,
+        sam_flag, depth_flag, spectralresidual_flag, brightness_flg,
         sam_heatmap_weight, sam_window_size, points_per_side, min_mask_region_area, pred_iou_thresh, stability_score_thresh, 
         depth_heatmap_weight, depth_window_size,
         spectralresidual_heatmap_weight,
-
+        brightness_heatmap_weight, brightness_window_size,
 ):
     results = []
     if sam_flag == True:
@@ -65,6 +65,9 @@ def analysis(
         results.append((depth.process(image, depth_window_size), depth_heatmap_weight))
     if spectralresidual_flag == True:
         results.append((spectralresidual.process(image), spectralresidual_heatmap_weight))
+    if brightness_flg == True:
+        results.append((brightness.process(image, brightness_window_size), brightness_heatmap_weight))
+        
 
     if len(results) > 1:
         result = composite(results)
@@ -101,16 +104,22 @@ with gr.Blocks() as demo:
             with gr.Accordion("Spectral Residual") as sam_block:
                 spectralresidual_flag = gr.Checkbox(False, label="enable")
                 spectralresidual_heatmap_weight = gr.Slider(value = 0, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
+
+            with gr.Accordion("Brightness") as sam_block:
+                brightness_flag = gr.Checkbox(False, label="enable")
+                brightness_heatmap_weight = gr.Slider(value = 0, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
+                brightness_window_size = gr.Number(value=64, label="window_size")
                 
 
         output=gr.Image(type="pil")
         submit.click(
             fn=analysis, inputs=[
                     input,
-                    sam_flag, depth_flag, spectralresidual_flag,
+                    sam_flag, depth_flag, spectralresidual_flag, brightness_flag,
                     sam_heatmap_weight, sam_window_size, points_per_side, min_mask_region_area, pred_iou_thresh, stability_score_thresh, 
                     depth_heatmap_weight, depth_window_size,
                     spectralresidual_heatmap_weight,
+                    brightness_heatmap_weight, brightness_window_size
                 ], outputs=output)
 # インターフェースの起動
 demo.launch(share=True)
