@@ -6,6 +6,17 @@ import matplotlib.pyplot as plt
 
 from tools import depth, sam
 from tools import depth
+from utils import load_seg_model
+
+import os
+
+
+path = os.getcwd()
+output_dir = f"{path}/output"
+input_dir = f"{path}/input"
+model_dir = f"{path}/models/sam"
+
+load_seg_model(model_dir)
 
 
 def create_heatmap_overlay(image, result, alpha=0.5, save_path='heatmap_overlay.png'):
@@ -15,11 +26,11 @@ def create_heatmap_overlay(image, result, alpha=0.5, save_path='heatmap_overlay.
     
     plt.imshow(result, cmap='jet', alpha=alpha)
     plt.axis('off')
-    plt.savefig('heatmap.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{path}/heatmap.png', bbox_inches='tight', pad_inches=0)
     plt.close()
-    heatmap = cv2.cvtColor(cv2.imread('heatmap.png'), cv2.COLOR_BGR2RGB)
+    heatmap = cv2.cvtColor(cv2.imread(f'{path}/heatmap.png'), cv2.COLOR_BGR2RGB)
     heatmap = cv2.resize(heatmap, (width, height))
-    cv2.imwrite('heatmap.png', heatmap)
+    cv2.imwrite(f'{path}/heatmap.png', heatmap)
     overlay = cv2.addWeighted(color_image, 1-alpha, heatmap, alpha, 0)
     cv2.imwrite(save_path, overlay)
     return overlay
@@ -47,7 +58,7 @@ def analysis(
 ):
     results = []
     if sam_flag == True:
-        results.append((sam.process(image, sam_window_size, points_per_side, pred_iou_thresh, stability_score_thresh, min_mask_region_area), sam_heatmap_weight))
+        results.append((sam.process(model_dir, image, sam_window_size, points_per_side, pred_iou_thresh, stability_score_thresh, min_mask_region_area), sam_heatmap_weight))
     if depth_flag == True:
         results.append((depth.process(image, depth_window_size), depth_heatmap_weight))
 
@@ -70,7 +81,7 @@ with gr.Blocks() as demo:
             
             with gr.Accordion("Object Density") as sam_block:
                 sam_flag = gr.Checkbox(False, label="enable")
-                sam_heatmap_weight = gr.Slider(value = 0, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
+                sam_heatmap_weight = gr.Slider(value = 1, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
                 sam_window_size = gr.Number(value=64, label="window_size")
                 with gr.Accordion("SAM Parameter") as sam_param:
                     points_per_side = gr.Number(value=32, label="window_size")

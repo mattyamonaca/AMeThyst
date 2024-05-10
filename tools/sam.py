@@ -140,20 +140,20 @@ def show_anns(anns):
 
 # 入力画像の読み込み
 def process(
+        model_dir, 
         image, window_size ,
         points_per_side,
         pred_iou_thresh,
         stability_score_thresh,
         min_mask_region_area,
         ):
-    print(min_mask_region_area)
     width = image.width
     height = image.height
     image = load_and_process_image(image)
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    sam_checkpoint = "./models/sam/sam_vit_h_4b8939.pth"
+    sam_checkpoint = f"{model_dir}/sam_vit_h_4b8939.pth"
     model_type = "vit_h"
     device = "cuda"
 
