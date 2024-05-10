@@ -153,7 +153,7 @@ def process(
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    sam_checkpoint = "./model/sam_vit_h_4b8939.pth"
+    sam_checkpoint = "./models/sam/sam_vit_h_4b8939.pth"
     model_type = "vit_h"
     device = "cuda"
 
