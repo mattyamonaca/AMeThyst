@@ -93,4 +93,4 @@ with gr.Blocks() as demo:
                     depth_heatmap_weight, depth_window_size,
                 ], outputs=output)
 # インターフェースの起動
-demo.launch()
+demo.launch(share=True)
