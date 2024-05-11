@@ -80,7 +80,7 @@ def analysis(
 # Gradio UIの設定
 enables = {}
 sam_params = {}
-with gr.Blocks() as demo:
+with gr.Blocks(analytics_enabled=False, title="AMeThyst") as demo:
     with gr.Row() as common:
         with gr.Column() as sub:
             input=gr.Image(type="pil")
