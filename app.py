@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tools import depth, sam, spectralresidual, brightness
+from tools import depth, sam, spectralresidual, brightness, brightness_diff
 from tools import depth
 from utils import load_seg_model
 
@@ -26,9 +26,9 @@ def create_heatmap_overlay(image, result, alpha=0.5, save_path='heatmap_overlay.
     
     plt.imshow(result, cmap='jet', alpha=alpha)
     plt.axis('off')
-    plt.savefig(f'{path}/heatmap.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{path}/heatmap/heatmap.png', bbox_inches='tight', pad_inches=0)
     plt.close()
-    heatmap = cv2.cvtColor(cv2.imread(f'{path}/heatmap.png'), cv2.COLOR_BGR2RGB)
+    heatmap = cv2.cvtColor(cv2.imread(f'{path}/heatmap/heatmap.png'), cv2.COLOR_BGR2RGB)
     heatmap = cv2.resize(heatmap, (width, height))
     cv2.imwrite(f'{path}/heatmap.png', heatmap)
     overlay = cv2.addWeighted(color_image, 1-alpha, heatmap, alpha, 0)
@@ -52,11 +52,12 @@ def composite(results):
 
 def analysis(
         image,
-        sam_flag, depth_flag, spectralresidual_flag, brightness_flg,
+        sam_flag, depth_flag, spectralresidual_flag, brightness_flg, brightness_diff_flg,
         sam_heatmap_weight, sam_window_size, points_per_side, min_mask_region_area, pred_iou_thresh, stability_score_thresh, 
         depth_heatmap_weight, depth_window_size,
         spectralresidual_heatmap_weight,
         brightness_heatmap_weight, brightness_window_size,
+        brightness_diff_heatmap_weight, brightness_diff_window_size
 ):
     results = []
     if sam_flag == True:
@@ -67,6 +68,8 @@ def analysis(
         results.append((spectralresidual.process(image), spectralresidual_heatmap_weight))
     if brightness_flg == True:
         results.append((brightness.process(image, brightness_window_size), brightness_heatmap_weight))
+    if brightness_diff_flg == True:
+        results.append((brightness_diff.process(image, brightness_diff_window_size), brightness_diff_heatmap_weight))
         
 
     if len(results) > 1:
@@ -87,7 +90,7 @@ with gr.Blocks() as demo:
             submit=gr.Button("submit")
             
             with gr.Accordion("Object Density") as sam_block:
-                sam_flag = gr.Checkbox(False, label="enable")
+                sam_flag = gr.Checkbox(True, label="enable")
                 sam_heatmap_weight = gr.Slider(value = 1, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
                 sam_window_size = gr.Number(value=64, label="window_size")
                 with gr.Accordion("SAM Parameter") as sam_param:
@@ -109,17 +112,23 @@ with gr.Blocks() as demo:
                 brightness_flag = gr.Checkbox(False, label="enable")
                 brightness_heatmap_weight = gr.Slider(value = 0, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
                 brightness_window_size = gr.Number(value=64, label="window_size")
+
+            with gr.Accordion("Brightness Diff") as sam_block:
+                brightness_diff_flag = gr.Checkbox(False, label="enable")
+                brightness_diff_heatmap_weight = gr.Slider(value = 0, minimum=0, maximum=1, step=0.05, label="heatmap_weight", randomize=True)
+                brightness_diff_window_size = gr.Number(value=64, label="window_size")
                 
 
         output=gr.Image(type="pil")
         submit.click(
             fn=analysis, inputs=[
                     input,
-                    sam_flag, depth_flag, spectralresidual_flag, brightness_flag,
+                    sam_flag, depth_flag, spectralresidual_flag, brightness_flag, brightness_diff_flag,
                     sam_heatmap_weight, sam_window_size, points_per_side, min_mask_region_area, pred_iou_thresh, stability_score_thresh, 
                     depth_heatmap_weight, depth_window_size,
                     spectralresidual_heatmap_weight,
-                    brightness_heatmap_weight, brightness_window_size
+                    brightness_heatmap_weight, brightness_window_size,
+                    brightness_diff_heatmap_weight, brightness_diff_window_size
                 ], outputs=output)
 # インターフェースの起動
 demo.launch(share=True)
