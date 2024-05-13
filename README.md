@@ -1,4 +1,5 @@
 # AMeThyst
+![Python version](https://img.shields.io/badge/python-3.8+-important)  
 **AMeThyst**: **A**rt **Me**trics **T**ools for **hy**pothe**s**is **t**est.
 
 AMeThyst is a collection of tools that analyze images input in various ways to define the amount of information in illustrations and visualize it in a heatmap format.

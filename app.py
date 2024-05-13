@@ -1,3 +1,4 @@
+from argparse import ArgumentParser, BooleanOptionalAction
 import gradio as gr
 from PIL import Image, ImageOps
 import cv2
@@ -10,6 +11,7 @@ from utils import load_seg_model
 
 import os
 
+PROGRAM_NAME = 'AMeThyst'
 
 path = os.getcwd()
 output_dir = f"{path}/output"
@@ -79,11 +81,18 @@ def analysis(
     image_overlay = plot_overlay(image, result)
     return image_overlay
 
+def parse_args():
+    parser = ArgumentParser(prog=PROGRAM_NAME, description="Art Metrics Tools for hypothesis test.")
+    parser.add_argument('--inbrowser', action=BooleanOptionalAction, default=False, help="Gradio inbrowser")
+    parser.add_argument('--share', action=BooleanOptionalAction, default=True, help="Gradio Share")
+    parser.add_argument('--max_file_size', type=str, default=10 * gr.FileSize.MB, help="Gradio Upload MaxFileSize")
+    
+    return parser.parse_args()
 
 # Gradio UIの設定
 enables = {}
 sam_params = {}
-with gr.Blocks(analytics_enabled=False, title="AMeThyst") as demo:
+with gr.Blocks(analytics_enabled=False, title=PROGRAM_NAME) as demo:
     with gr.Row() as common:
         with gr.Column() as sub:
             input=gr.Image(type="pil")
@@ -130,5 +139,7 @@ with gr.Blocks(analytics_enabled=False, title="AMeThyst") as demo:
                     brightness_heatmap_weight, brightness_window_size,
                     brightness_diff_heatmap_weight, brightness_diff_window_size
                 ], outputs=output)
+# コマンドライン引数の解析
+args = parse_args()
 # インターフェースの起動
-demo.launch(share=True)
+demo.launch(inbrowser=args.inbrowser, share=args.share, max_file_size=args.max_file_size)
